@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    container_name: lfr-postgres
+    environment:
+      POSTGRES_DB: lfr
+      POSTGRES_USER: lfr
+      POSTGRES_PASSWORD: lfr1234
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - lfr_network
+
+  web:
+    build: .
+    container_name: lfr-backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DEBUG=1
+      - DB_NAME=lfr
+      - DB_USER=lfr
+      - DB_PASSWORD=lfr1234
+      - DB_HOST=db
+      - DB_PORT=5432
+    networks:
+      - lfr_network
+
+volumes:
+  postgres_data:
+
+networks:
+  lfr_network:
+    driver: bridge
